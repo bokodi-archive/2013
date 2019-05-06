@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Zoom</title>
+	<meta http-equiv="content type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="style.css">
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script>
+		$(document).ready(function() {
+			$("#container")
+			.mouseenter(function(e) {
+				offLeft = $("#container").offset().left;
+				offTop = $("#container").offset().top;
+				x = e.pageX - ($("#magnifier").width() / 2);
+				y = e.pageY - ($("#magnifier").height() / 2);
+				
+				imageSrc = $("#container img").attr("src");
+				imageUrl = "url("+imageSrc+")";
+				$("#original img").attr("src", imageSrc);
+				
+				$("#magnifier").css({'top': y ,'left': x ,'display':'block'});
+				$("#magnifier").css('background-image', imageUrl);
+			})
+			.mousemove(function(e) {
+				halfMagnifierW = $("#magnifier").width() / 2;
+				halfMagnifierH = $("#magnifier").height() / 2;
+				x = e.pageX - halfMagnifierW;
+				y = e.pageY - halfMagnifierH;
+				$("#magnifier").css({'top': y ,'left': x });
+				
+				originalWidth = $("#original").width();
+				originalHeight = $("#original").height();
+				widthRation = originalWidth / $("#container").width();
+				heightRation = originalHeight / $("#container").height();
+				leftPos = ((e.pageX - offLeft) * widthRation - halfMagnifierW) * (-1);
+				topPos = ((e.pageY - offTop) * heightRation - halfMagnifierH) * (-1);
+				$("#magnifier").css({'background-position': leftPos + 'px ' + topPos + 'px'});
+	
+				if (e.pageX < offLeft || e.pageY < offTop) {
+					$("#magnifier").css({'display':'none'});
+				} else if (e.pageX > ($("#container").width() + offLeft) || e.pageY > ($("#container").height() + offTop)){
+					$("#magnifier").css({'display':'none'});
+				}
+			})
+			.mouseleave(function() {
+				$("#magnifier").css({'display':'none'});
+			});
+		});
+	</script>
+</head>
+<body>
+
+	<div id="original"><img src=""/></div>
+	<div id="container">
+		<img src="scenery.jpg"/>
+		<div id="magnifier"></div>
+	</div>
+
+</body>
+</html>

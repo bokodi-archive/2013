@@ -1,0 +1,72 @@
+* {
+	margin: 0;
+	padding: 0;
+	text-decoration: none;
+	list-style-type: none;
+	color: black;
+}
+body {
+	background: url('pics/bg.jpg');
+}
+div.clear {
+	clear: both;
+}
+div#header {
+	width: 500px;
+	height: 160px;
+	margin: 20px auto 25px auto;
+	background-image: url('pics/logo.png');
+}
+div#starter_div {
+	width: 250px;
+	height: 300px;
+	margin: 0 auto;
+	padding: 20px;
+	background: #965000;
+	background: -moz-linear-gradient(top,  #965000 0%, #af6c00 99%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#965000), color-stop(99%,#af6c00));
+	background: -webkit-linear-gradient(top,  #965000 0%,#af6c00 99%);
+	background: -o-linear-gradient(top,  #965000 0%,#af6c00 99%);
+	background: -ms-linear-gradient(top,  #965000 0%,#af6c00 99%);
+	background: linear-gradient(to bottom,  #965000 0%,#af6c00 99%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#965000', endColorstr='#af6c00',GradientType=0 );
+}
+p#title {
+	margin: 20px 0 60px 0;
+	font-size: 150%;
+	font-weight: bold;
+	color: brown;
+	text-align: center;
+	color: #000;
+    box-shadow: 0px 0px 5px #6d2a15;
+    background: #ffb400;
+    background: -moz-linear-gradient(top,  #ffb400 0%, #ff8500 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffb400), color-stop(100%,#ff8500));
+    background: -webkit-linear-gradient(top,  #ffb400 0%,#ff8500 100%);
+    background: -o-linear-gradient(top,  #ffb400 0%,#ff8500 100%);
+    background: -ms-linear-gradient(top,  #ffb400 0%,#ff8500 100%);
+    background: linear-gradient(to bottom,  #ffb400 0%,#ff8500 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffb400', endColorstr='#ff8500',GradientType=0 );
+}
+div#starter_div form p {
+	margin: 0 0 15px 0;
+	text-align: center;
+	font-size: 125%;
+}
+div#starter_div form p label {
+	margin: 0 20px 0 0;
+}
+div#game_start {
+	cursor: pointer;
+	float: right;
+	font-size: 200%;
+	color: blue;
+	margin: 40px 35px 0 0;
+}
+div#game_start:hover {
+	color: white;
+}
+
+
+
+

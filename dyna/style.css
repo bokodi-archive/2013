@@ -1,0 +1,80 @@
+* {
+	margin: 0;
+	padding: 0;
+	text-decoration: none;
+	list-style-type: none;
+	border: none;
+	color: black;
+}
+body {
+	background: url('pics/bg.jpg');
+}
+div#area {
+	width: 900px;
+	height: 540px;
+	margin: 40px auto 0 auto;
+	position: relative;
+	background: url('pics/grass.jpg');
+}
+div#area ul li {
+	width: 60px;
+	height: 60px;
+	float: left;
+}
+div#character {
+	width: 32px;
+	height: 32px;
+	background: url('pics/character.png') no-repeat;
+	position: absolute;
+	top: 5px;
+	left: 5px;
+}
+div.monster {
+	width: 60px;
+	height: 60px;
+	background: url('pics/monster.png') no-repeat;
+	position: absolute;
+}
+div.bomb {
+	width: 50px;
+	height: 50px;
+	background: url('pics/bomb.png') no-repeat;
+	margin: 5px;
+}
+div.fire_up {
+	width: 15px;
+	height: 48px;
+	background: url('pics/fire_up.png') no-repeat;
+	margin: 1px 0 0 22px;
+}
+div.fire_right {
+	width: 48px;
+	height: 15px;
+	background: url('pics/fire_right.png') no-repeat;
+	margin: 22px 0 0 1px;
+}
+div.fire_down {
+	width: 15px;
+	height: 48px;
+	background: url('pics/fire_down.png') no-repeat;
+	margin: 1px 0 0 22px;
+}
+div.fire_left {
+	width: 48px;
+	height: 15px;
+	background: url('pics/fire_left.png') no-repeat;
+	margin: 22px 0 0 1px;
+}
+
+div#character.front-right { background-position: 0px 0px; }
+div#character.front-stand { background-position: -32px 0px; }
+div#character.front-left { background-position: -64px 0px; }
+div#character.right-right { background-position: -64px -64px; }
+div#character.right-stand { background-position: -32px -64px; }
+div#character.right-left { background-position: -0px -64px; }
+div#character.back-right { background-position: 0px -96px; }
+div#character.back-stand { background-position: -32px -96px; }
+div#character.back-left { background-position: -64px -96px; }
+div#character.left-right { background-position: 0px -32px; }
+div#character.left-stand { background-position: -32px -32px; }
+div#character.left-left { background-position: -64px -32px; }

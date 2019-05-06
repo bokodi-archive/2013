@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Lines</title>
+	<meta http-equiv="content type" content="text/html; charset=iso-8859-2">
+	<link rel="stylesheet" href="style.css">
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script>
+		$(document).ready(function() {
+			// defaults
+			balls = ["red", "blue", "green", "yellow", "orange", "purple", "brown"]; // available: red blue green yellow orange purple pink brown grey
+			rowLength = 10;
+			columnLength = 10;
+			starterBallsNum = 10;
+			numberOFcells = rowLength * columnLength;
+			emptyCells = numberOFcells - starterBallsNum;
+			numberOFnexts = 3;
+			points = 0;
+			pointsPerBall = 10;
+			minOfExplode = 5;
+			basePulpit = 20; // px
+			highestPulpit = 300; // px
+			
+			// draw table
+			for (i=0; i < numberOFcells; i++) {
+				$("#table ul").append("<li></li>");
+			}
+			$("#kpulpit").css("height", highestPulpit);
+			$("#kpulpit").css("width", "72");
+			$("#kpulpit").css("top", "70px");
+			$("#kfigure").css("top", 0 - highestPulpit + "px");
+			
+			// add the initial balls
+			for (i = 0; i < starterBallsNum; i++) {
+				object = $("#table ul li");
+				var color = balls[Math.floor((Math.random()*balls.length))];
+				do {
+					var cell = Math.floor((Math.random()*numberOFcells));
+				} while ( object.eq(cell).hasClass("ball") )
+				object.eq(cell).html('<img src="balls/' + color +'.png"/>');
+				object.eq(cell).addClass("ball");
+				object.eq(cell).addClass(color);
+			}
+			
+			function nextBalls(x) {
+				followings = new Array();
+				for (i = 0; i < x; i++) {
+					var color = balls[Math.floor((Math.random()*balls.length))];
+					$("#next").append('<img src="balls/' + color +'.png"/>');
+					followings[i] = color;
+				}
+			}
+			nextBalls(numberOFnexts);
+			
+			// define the position of cells (row && column)
+			rows = new Array();
+			columns = new Array();
+			for (i = 0; i < numberOFcells; i++) {
+				thisRow = Math.floor(i / rowLength) + 1;
+				thisColumn = (i - (thisRow - 1) * rowLength) + 1;
+				rows[i] = thisRow;
+				columns[i] = thisColumn;
+			}
+			
+			function whatColor(pos) {
+				object = $("#table ul li");
+				if (object.eq(pos).hasClass("red")) {color = "red"}
+				if (object.eq(pos).hasClass("blue")) {color = "blue"}
+				if (object.eq(pos).hasClass("green")) {color = "green"}
+				if (object.eq(pos).hasClass("yellow")) {color = "yellow"}
+				if (object.eq(pos).hasClass("grey")) {color = "grey"}
+				if (object.eq(pos).hasClass("brown")) {color = "brown"}
+				if (object.eq(pos).hasClass("pink")) {color = "pink"}
+				if (object.eq(pos).hasClass("purple")) {color = "purple"}
+				if (object.eq(pos).hasClass("orange")) {color = "orange"}
+				return color;
+			}
+			
+			function explode(pos, color) {
+				object = $("#table ul li");
+				destroy = 0;
+				
+				circle = 1;
+				vertical = 1;
+				verticalExplode = new Array();
+				upper = object.eq(pos - circle * rowLength);
+				under = object.eq(pos + circle * rowLength);				
+				if ( upper.hasClass(color) || under.hasClass(color) ) {
+					verticalExplode[vertical - 1] = pos;
+					do {
+						if (upper.hasClass(color) && Math.abs(rows[pos - circle * rowLength] - rows[pos - (circle-1) * rowLength]) == 1) {
+							vertical++;
+							verticalExplode[vertical - 1] = pos - circle * rowLength;
+						} else {
+							break;
+						}
+						circle++;
+						upper = object.eq(pos - circle * rowLength);
+					} while ( upper.hasClass(color) )
+					circle = 1;
+					do {
+						if (under.hasClass(color)) {
+							vertical++;
+							verticalExplode[vertical - 1] = pos + circle * rowLength;
+						}  else {
+							break;
+						}
+						circle++;
+						under = object.eq(pos + circle * rowLength);						
+					} while ( under.hasClass(color) )
+					if ( vertical >= minOfExplode ) {
+						for (i = 0; i < verticalExplode.length; i++) {
+							object.eq(verticalExplode[i]).empty();
+							object.eq(verticalExplode[i]).removeClass("ball");
+							object.eq(verticalExplode[i]).removeClass(color);
+						}
+					}
+						
+				}
+				
+				circle = 1;
+				horizontal = 1;
+				horizontalExplode = new Array();
+				leftSide = object.eq(pos - circle * 1);
+				rightSide = object.eq(pos + circle * 1);
+				if ( leftSide.hasClass(color) && Math.abs(columns[pos] - columns[pos-1]) == 1 || rightSide.hasClass(color) && Math.abs(columns[pos] - columns[pos+1]) == 1 ) {
+					horizontalExplode[horizontal - 1] = pos;
+					do {
+						if (leftSide.hasClass(color) && columns[leftSide.index()] != rowLength) {
+							horizontal++;
+							horizontalExplode[horizontal - 1] = pos - circle * 1;
+						} else {
+							break;
+						}
+						circle++;
+						leftSide = object.eq(pos - circle * 1);
+					} while ( leftSide.hasClass(color) )
+					circle = 1;
+					do {
+						if (rightSide.hasClass(color) && columns[rightSide.index()] != 1) {
+							horizontal++;
+							horizontalExplode[horizontal - 1] = pos + circle * 1;
+						} else {
+							break;
+						}
+						circle++;
+						rightSide = object.eq(pos + circle * 1);
+					} while ( rightSide.hasClass(color) )
+					if ( horizontal >= minOfExplode ) {
+						for (i = 0; i < horizontalExplode.length; i++) {
+							object.eq(horizontalExplode[i]).empty();
+							object.eq(horizontalExplode[i]).removeClass("ball");
+							object.eq(horizontalExplode[i]).removeClass(color);
+						}
+					}
+				}
+				
+				circle = 1;
+				ULDR = 1;
+				ULDRExplode = new Array();
+				UL = object.eq(pos - circle * rowLength - circle);
+				DR = object.eq(pos + circle * rowLength + circle);
+				if ( (UL.hasClass(color) && columns[pos - circle * rowLength - circle] > 0) || (DR.hasClass(color) && columns[pos + circle * rowLength + circle] <= rowLength)) {
+					ULDRExplode[ULDR - 1] = pos;
+					do {
+						if (UL.hasClass(color) && columns[pos - circle * rowLength - circle] > 0 && Math.abs(rows[pos - circle * rowLength - circle] - rows[pos - (circle-1) * rowLength - (circle-1)]) == 1) {
+							ULDR++;
+							ULDRExplode[ULDR - 1] = pos - circle * rowLength - circle;
+						} else {
+							break;
+						}
+						circle++;
+						UL = object.eq(pos - circle * rowLength - circle);
+					} while ( UL.hasClass(color) )
+					circle = 1;
+					do {
+						if (DR.hasClass(color) && columns[pos + circle * rowLength + circle] <= rowLength && Math.abs(rows[pos + circle * rowLength + circle] - rows[pos + (circle-1) * rowLength + (circle-1)]) == 1) {
+							ULDR++;
+							ULDRExplode[ULDR - 1] = pos + circle * rowLength + circle;
+						} else {
+							break;
+						}
+						circle++;
+						DR = object.eq(pos + circle * rowLength + circle);
+					} while ( DR.hasClass(color) )
+					if ( ULDR >= minOfExplode ) {
+						for (i = 0; i < ULDRExplode.length; i++) {
+							object.eq(ULDRExplode[i]).empty();
+							object.eq(ULDRExplode[i]).removeClass("ball");
+							object.eq(ULDRExplode[i]).removeClass(color);
+						}
+					}				
+				
+				}
+				
+				circle = 1;
+				URDL = 1;
+				URDLExplode = new Array();
+				UR = object.eq(pos - circle * rowLength + circle);
+				DL = object.eq(pos + circle * rowLength - circle);
+				if ( (UR.hasClass(color) && columns[pos - circle * rowLength + circle] <= rowLength) || (DL.hasClass(color) && columns[pos + circle * rowLength - circle] > 0)) {
+					URDLExplode[URDL - 1] = pos;
+					do {
+						if (UR.hasClass(color) && columns[pos - circle * rowLength + circle] <= rowLength && Math.abs(rows[pos - circle * rowLength + circle] - rows[pos - (circle-1) * rowLength + (circle-1)]) == 1) {
+							URDL++;
+							URDLExplode[URDL - 1] = pos - circle * rowLength + circle;
+						} else {
+							break;
+						}
+						circle++;
+						UR = object.eq(pos - circle * rowLength + circle);
+					} while ( UR.hasClass(color) )
+					circle = 1;
+					do {
+						if (DL.hasClass(color) && columns[pos + circle * rowLength - circle] > 0 && Math.abs(rows[pos + circle * rowLength - circle] - rows[pos + (circle-1) * rowLength - (circle-1)]) == 1) {
+							URDL++;
+							URDLExplode[URDL - 1] = pos + circle * rowLength - circle;
+						} else {
+							break;
+						}
+						circle++;
+						DL = object.eq(pos + circle * rowLength - circle);
+					} while ( DL.hasClass(color) )
+					if ( URDL >= minOfExplode ) {
+						for (i = 0; i < URDLExplode.length; i++) {
+							object.eq(URDLExplode[i]).empty();
+							object.eq(URDLExplode[i]).removeClass("ball");
+							object.eq(URDLExplode[i]).removeClass(color);
+						}
+					}				
+				
+				}
+				
+				if ( URDL >= minOfExplode || ULDR >= minOfExplode || horizontal >= minOfExplode || vertical >= minOfExplode) {
+					destroy = 1;
+				}
+				
+			}
+			
+			function findPath(start, finish) {
+				object = $("#table ul li");
+				available = new Array();
+				checked = new Array();
+				availableIndex = -1;
+				checkIndex = -1;
+				complete = 0;
+				availableIndex++; available[availableIndex] = start;
+				if ( !object.eq(start - rowLength).hasClass("ball") && (start - rowLength) >= 0 )
+					{ availableIndex++; available[availableIndex] = start - rowLength; }
+				if ( !object.eq(start - 1).hasClass("ball") && Math.abs(columns[start] - columns[start - 1]) == 1 )
+					{ availableIndex++; available[availableIndex] = start - 1; }
+				if ( !object.eq(start + 1).hasClass("ball") && Math.abs(columns[start] - columns[start + 1]) == 1 )
+					{ availableIndex++; available[availableIndex] = start + 1; }
+				if ( !object.eq(start + rowLength).hasClass("ball") && (start + rowLength) <= (numberOFcells - 1) )
+					{ availableIndex++; available[availableIndex] = start + rowLength; }
+				checkIndex++; checked[checkIndex] = start;
+				
+				do {
+					avbLen = available.length;
+					x = 0;
+					for (i = 0; i < avbLen; i++) {
+						if ( jQuery.inArray(available[i], checked) != (-1) ) { continue }
+						if ( available[i] == finish ) { complete = 1; }
+						if ( !object.eq(available[i] - rowLength).hasClass("ball") && (available[i] - rowLength) >= 0 && jQuery.inArray((available[i] - rowLength), available) == (-1) )
+							{ availableIndex++; available[availableIndex] = available[i] - rowLength; x = 1; }
+						if ( !object.eq(available[i] - 1).hasClass("ball") && Math.abs(columns[available[i]] - columns[available[i] - 1]) == 1 && jQuery.inArray((available[i] - 1), available) == (-1) )
+							{ availableIndex++; available[availableIndex] = available[i] - 1; x = 1; }
+						if ( !object.eq(available[i] + 1).hasClass("ball") && Math.abs(columns[available[i]] - columns[available[i] + 1]) == 1 && jQuery.inArray((available[i] + 1), available) == (-1) )
+							{ availableIndex++; available[availableIndex] = available[i] + 1; x = 1; }
+						if ( !object.eq(available[i] + rowLength).hasClass("ball") && (available[i] + rowLength) <= (numberOFcells - 1) && jQuery.inArray((available[i] + rowLength), available) == (-1) )
+							{ availableIndex++; available[availableIndex] = available[i] + rowLength; x = 1; }
+						checkIndex++; checked[checkIndex] = available[i];
+					}
+				} while ( x == 1 && complete == 0 )
+				
+				return complete;
+				
+			}
+
+			$("#table ul li").click(function() {
+				object = $("#table ul li");
+				object.css("background", "#DBD688");
+				item = $(this);
+				nexts = $("#next")
+				selected = $(".selected");
+				object.removeClass("selected");
+				
+				if (item.hasClass("ball")) {
+					if (emptyCells < 1) {return false}
+					item.addClass("selected");
+					selectedIndex = $(this).index();
+					$(this).css("background", "white");
+				} else if (selectedIndex >= 0 && findPath(selectedIndex, $(this).index()) == 1) {
+					
+					if (emptyCells < 1) {return false}
+					item.addClass(whatColor(selectedIndex));
+					object.eq(selectedIndex).removeClass(whatColor(selectedIndex));
+					
+					object.css("background", "#DBD688");
+					item.html(selected.children().clone());
+					item.addClass("ball");
+					selected.empty();
+					selected.removeClass("ball");
+					
+					itemColor = whatColor(selectedIndex);
+					explode(item.index(), itemColor);
+					
+					if (destroy == 0) {
+						nexts.empty();
+						for (i = 0; i < numberOFnexts; i++) {
+						
+							emptyCells = 0;
+							for (j = 0; j < numberOFcells; j++) {
+								if (!$("#table ul li").eq(j).hasClass("ball")) {emptyCells++}
+							}
+							if (emptyCells < 1) {return false}
+						
+							object = $("#table ul li");
+							var color = followings[i];
+							do {
+								var cell = Math.floor((Math.random()*numberOFcells));
+							} while (object.eq(cell).hasClass("ball"))
+							object.eq(cell).html('<img src="balls/' + color +'.png"/>');
+							object.eq(cell).addClass("ball");
+							object.eq(cell).addClass(color);
+							explode(object.eq(cell).index(), color);
+						}
+						nextBalls(numberOFnexts);
+					}
+					
+					if ( horizontal >= minOfExplode ) { points += horizontal * pointsPerBall }
+					if ( vertical >= minOfExplode ) { points += vertical * pointsPerBall }
+					if ( ULDR >= minOfExplode ) { points += ULDR * pointsPerBall }
+					if ( URDL >= minOfExplode ) { points += URDL * pointsPerBall }
+					$("#pscore").html("score: " + points);
+/*					if ( URDL >= minOfExplode || ULDR >= minOfExplode || horizontal >= minOfExplode || vertical >= minOfExplode) {
+						thisHeight = $("#ppulpit").height();
+						pos = $("#ppulpit").position().top - $("#container").position().top;
+						$("#ppulpit").css("height", thisHeight + 10);
+						$("#ppulpit").css("width", "72");
+						$("#ppulpit").css("top", pos - 10);
+						$("#pfigure").css("top", (-10));
+					}
+*/					
+					selectedIndex = -1;
+				} else {
+					if (emptyCells < 1) {return false}
+					object.css("background", "#DBD688");
+					object.removeClass("selected");
+					selectedIndex = -1;
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+	<div class="hide">
+		<img src="balls/red.png"/>
+		<img src="balls/yellow.png"/>
+		<img src="balls/green.png"/>
+		<img src="balls/grey.png"/>
+		<img src="balls/pink.png"/>
+		<img src="balls/purple.png"/>
+		<img src="balls/orange.png"/>
+		<img src="balls/brown.png"/>
+		<img src="balls/blue.png"/>
+	</div>
+	<div id="next"></div>
+	<div id="container">
+		<div id="pretender"><img class="bottom" src="pics/bottom.png"/><img id="ppulpit" class="pulpit" src="pics/pulpit.png"/><img id="pfigure" src="pics/pretender.png"/></div>
+		<div id="table"><ul></ul></div>
+		<div id="king"><img class="bottom" src="pics/bottom.png"/><img id="kpulpit" class="pulpit" src="pics/pulpit.png"/><img id="kfigure" src="pics/king.png"></div>
+	</div>
+	<div id="end">
+		<div id="pscore">score: 0</div>
+		<div id="kscore">score: 16100</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Chess Logic</title>
+	<meta http-equiv="content type" content="text/html; charset=iso-8859-2">
+	<link rel="stylesheet" href="style.css">
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="levels.js"></script>
+	<script>
+		$(document).ready(function() {
+			scored = 0;
+			actlvl = 0;
+			allAvailableMoves = new Array();
+			rowLength = Math.sqrt($("#table ul li").length);
+			lastElementNum = rowLength * rowLength - 1;
+			for (i = 0, j = 0; i < rowLength; i++, j++) {
+				$("#table ul li").eq(i).append(j);
+				$("#table ul li").eq(i).addClass("value");
+			}
+			position = i+1;
+			$("#table ul li").eq(position).append("<img class='peanut' src='peanut.gif'>");
+			$("#table ul li").eq(position).addClass("pos");
+			for (i, j = 1; i < $("#table ul li").length; i += Math.sqrt($("#table ul li").length), j++) {
+				$("#table ul li").eq(i).append(j);
+				$("#table ul li").eq(i).addClass("value");
+			}
+			$("#table ul li").eq(lastElementNum).html("<img class='cross' src='rcross.png'>");
+			
+			// define the position of cells
+			rows = new Array();
+			columns = new Array();
+			for (g = 0; g < $("#table ul li").length; g++) {
+				thisRow = Math.ceil(g/rowLength) - 1;
+				thisColumn = (g - thisRow * rowLength);
+				if (g <= rowLength) {thisRow = 0; thisColumn = 0};
+				if (g % rowLength == 0) {thisRow = 0; thisColumn = 0};
+				rows[g] = thisRow;
+				columns[g] = thisColumn;
+			}
+			
+			// define levels
+			actual = thisLevel[actlvl];
+			actualC = thisCell[actlvl];
+			wallRow = new Array();
+			wallColumn = new Array();
+			$("#pawn").html(actual[0]);
+			$("#knight").html(actual[1]);
+			$("#bishop").html(actual[2]);
+			$("#rook").html(actual[3]);
+			$("#queen").html(actual[4]);
+			$("#king").html(actual[5]);
+			$("#table ul li").eq(actualC[0]).append("<img src='key.png'/>");
+			$("#table ul li").eq(actualC[0]).addClass("key");
+			steps = (-1) + actual[0] + actual[1] + actual[2] + actual[3] + actual[4] + actual[5];
+			for (s = 1; s < actualC.length; s++) {
+				$("#table ul li").eq(actualC[s]).append("<img src='wall.jpg'/>");
+				$("#table ul li").eq(actualC[s]).addClass("walled");
+				wallRow[s - 1] = rows[actualC[s]];
+				wallColumn[s - 1] = columns[actualC[s]]
+			}
+			
+			// define move facilities
+			function pawn(p) {
+				return p - rowLength;
+			}
+			function horse(p) {
+				horseMoves = new Array();
+				horseMoves[0] = p - 2 * rowLength - 1;
+				horseMoves[1] = p - 2 * rowLength + 1;
+				horseMoves[2] = p - rowLength - 2;
+				horseMoves[3] = p - rowLength + 2;
+				horseMoves[4] = p + 2 * rowLength - 1;
+				horseMoves[5] = p + 2 * rowLength + 1;
+				horseMoves[6] = p + rowLength - 2;
+				horseMoves[7] = p + rowLength + 2;
+				return horseMoves;
+			}
+			function bishop(p) {
+				bishopDR = new Array();
+				bishopDL = new Array();
+				bishopUR = new Array();
+				bishopUL = new Array();
+				
+				for (n = 1; n < rowLength - 1; n++) {
+					avva = 0;
+					for (e = 0; e < wallRow.length; e++) {
+						if (p < actualC[e+1] && actualC[e+1] < (p + n * rowLength + n) && wallRow[e] - rows[p] == wallColumn[e] - columns[p]) {avva = 1;}
+					}
+					if (columns[(p + n * rowLength + n)] <= 0 || columns[(p + n * rowLength + n)] > rowLength) {break};
+					if (avva == 1) {continue}
+					bishopDR[n] = p + n * rowLength + n;
+				}
+				for (n = 1; n < rowLength - 1; n++) {
+					avvb = 0;
+					for (e = 0; e < wallRow.length; e++) {
+						if (p < actualC[e+1] && actualC[e+1] < (p + n * rowLength - n) && wallRow[e] - rows[p] == columns[p] - wallColumn[e]) {avvb = 1;}
+					}
+					if (columns[(p + n * rowLength - n)] <= 0 || columns[(p + n * rowLength - n)] > rowLength) {break};
+					if (avvb == 1) {continue}
+					bishopDL[n] = p + n * rowLength - n;
+				}
+				for (n = 1; n < rowLength - 1; n++) {
+					avvc = 0;
+					for (e = 0; e < wallRow.length; e++) {
+						if (p > actualC[e+1] && actualC[e+1] > (p - n * rowLength + n) && rows[p] - wallRow[e] == wallColumn[e] - columns[p]) {avvc = 1;}
+					}
+					if (columns[(p - n * rowLength + n)] <= 0 || columns[(p - n * rowLength + n)] > rowLength) {break};
+					if (avvc == 1) {continue}
+					bishopUR[n] = p - n * rowLength + n;
+				}
+				for (n = 1; n < rowLength - 1; n++) {
+					avvd = 0;
+					for (e = 0; e < wallRow.length; e++) {
+						if (p > actualC[e+1] && actualC[e+1] > (p - n * rowLength - n) && rows[p] - wallRow[e] == columns[p] - wallColumn[e]) {avvd = 1;}
+					}
+					if (columns[(p - n * rowLength - n)] <= 0 || columns[(p - n * rowLength - n)] > rowLength) {break};
+					if (avvd == 1) {continue}
+					bishopUL[n] = p - n * rowLength - n;
+				}
+				RI = bishopDR.concat(bishopUR);
+				LE = bishopDL.concat(bishopUL);
+				return RI.concat(LE);
+			}
+			function rook(p) {
+				rookMoves = new Array();
+				rookRow = rows[p];
+				rookColumn = columns[p];
+				for (o = 0, m = 0; m < lastElementNum + 1; m++) {
+					avv = 0;
+					for (y = 0; y < wallRow.length; y++) {
+						if (rookColumn == wallColumn[y] && wallRow[y] > rookRow && rows[m] > wallRow[y]) {avv = 1;}
+						else if (rookColumn == wallColumn[y] && wallRow[y] < rookRow && rows[m] < wallRow[y]) {avv = 1;}
+						else if (rookRow == wallRow[y] && wallColumn[y] > rookColumn && columns[m] > wallColumn[y]) {avv = 1;}
+						else if (rookRow == wallRow[y] && wallColumn[y] < rookColumn && columns[m] < wallColumn[y]) {avv = 1;}
+					}
+					if (m == p || avv == 1) {continue}
+					else if (rookRow == rows[m]) {
+						rookMoves[o] = m;
+						o++;
+					} else if (rookColumn == columns[m]) {
+						rookMoves[o] = m;
+						o++;
+					}
+					
+				}
+				return rookMoves;
+			}
+			function king(p) {
+				kingMoves = new Array();
+				kingMoves[0] = p - rowLength - 1;
+				kingMoves[1] = p - rowLength;
+				kingMoves[2] = p - rowLength + 1;
+				kingMoves[3] = p - 1;
+				kingMoves[4] = p + 1;
+				kingMoves[5] = p + rowLength - 1;
+				kingMoves[6] = p + rowLength;
+				kingMoves[7] = p + rowLength + 1;
+				return kingMoves;
+			}
+			
+			// piece choose event
+			$(".piece").click(function () {			
+				$(".piece").removeClass("selected");
+				$(this).addClass("selected");
+				$(".piece").css("background", "#FFEDB0");
+				$(".selected").css("background", "green");
+				$(".available").css("background", "#FFEDB0");
+				$("#table ul li").removeClass("available");
+				if (actual[$(".selected").index() / 2] <= 0) {return false};
+				
+				if (steps != 0 && $(".selected").hasClass("pawn") && !$("#table ul li").eq(pawn(position)).hasClass("value") && !$("#table ul li").eq(pawn(position)).hasClass("walled")) {
+					$("#table ul li").eq(pawn(position)).addClass("available");
+					$("#table ul li").eq(pawn(position)).css("background", "green");
+				} else if ($(".selected").hasClass("knight")) {
+					for (b = 0; b < 8; b++) {
+						avi = horse(position)[b];
+						distance = Math.abs(columns[position] - columns[avi]);
+						if (steps != 0 && avi != lastElementNum && distance < 3 && avi > 0 && !$("#table ul li").eq(avi).hasClass("value") && !$("#table ul li").eq(avi).hasClass("walled")) {
+							$("#table ul li").eq(avi).addClass("available");
+							$("#table ul li").eq(avi).css("background", "green");
+						}
+					}
+				} else if ($(".selected").hasClass("bishop")) {
+					for (b = 0; b < 4 * rowLength; b++) {
+						avib = bishop(position)[b];
+						if (steps != 0 && avib != lastElementNum && avib > 0 && !$("#table ul li").eq(avib).hasClass("value") && !$("#table ul li").eq(avib).hasClass("walled")) {
+							$("#table ul li").eq(avib).addClass("available");
+							$("#table ul li").eq(avib).css("background", "green");
+						}
+					}
+				} else if ($(".selected").hasClass("rook")) {
+					for (c = 0; c < 121; c++) {
+						avic = rook(position)[c];
+						if (steps != 0 && avic != lastElementNum && !$("#table ul li").eq(avic).hasClass("walled")) {
+							$("#table ul li").eq(avic).addClass("available");
+							$("#table ul li").eq(avic).css("background", "green");
+						}
+					}
+				} else if ($(".selected").hasClass("queen")) {
+					for (b = 0; b < 4 * rowLength; b++) {
+						avib = bishop(position)[b];
+						if (steps != 0 && avib != lastElementNum && avib > 0 && !$("#table ul li").eq(avib).hasClass("value") && !$("#table ul li").eq(avib).hasClass("walled")) {
+							$("#table ul li").eq(avib).addClass("available");
+							$("#table ul li").eq(avib).css("background", "green");
+						}
+					}
+					for (c = 0; c < 121; c++) {
+						avic = rook(position)[c];
+						if (steps != 0 && avic != lastElementNum && !$("#table ul li").eq(avic).hasClass("walled")) {
+							$("#table ul li").eq(avic).addClass("available");
+							$("#table ul li").eq(avic).css("background", "green");
+						}
+					}
+				} else if ($(".selected").hasClass("king")) {
+					for (d = 0; d < 8; d++) {
+						avid = king(position)[d];
+						if (steps != 0 && avid != lastElementNum && avid > 0 && !$("#table ul li").eq(avid).hasClass("value") && !$("#table ul li").eq(avid).hasClass("walled")) {
+							$("#table ul li").eq(avid).addClass("available");
+							$("#table ul li").eq(avid).css("background", "green");
+						}
+					}
+				}
+				
+			});
+			
+			// move event
+			$("#table ul li").click(function () {
+				
+				if ($(".selected").hasClass("knight")) {
+					allAvailableMoves = horse(position);
+				} else if ($(".selected").hasClass("bishop")) {
+					allAvailableMoves = bishop(position);
+				} else if ($(".selected").hasClass("rook")) {
+					allAvailableMoves = rook(position);
+				} else if ($(".selected").hasClass("queen")) {
+					allAvailableMoves = bishop(position).concat(rook(position));
+				} else if ($(".selected").hasClass("king")) {
+					allAvailableMoves = king(position);
+				}
+			
+				if ($(this).hasClass("available") || ($(this).hasClass("finish") && jQuery.inArray(lastElementNum, allAvailableMoves) != (-1))) {
+					overWrite = actual[$(".selected").index() / 2] - 1;
+					actual[$(".selected").index() / 2] = overWrite;
+					if (overWrite < 0) {return false};
+					$(".selected").next().html(overWrite);
+					$(".piece").removeClass("selected");
+					$(".piece").css("background", "#FFEDB0");
+					$(".available").css("background", "#FFEDB0");
+					$("#table ul li").removeClass("available");
+					$(".pos").empty();
+					$("#table ul li").removeClass("pos");
+					$(this).addClass("pos");
+					$(this).append("<img class='peanut' src='peanut.gif'>");
+					position = $(this).index();
+					
+					if ($(".pos").hasClass("key")) {
+						$("#table ul li").eq(actualC[0]).empty();
+						$("#table ul li").eq(actualC[0]).append("<img class='peanut' src='peanut.gif'>");
+						$("#table ul li").eq(actualC[0]).removeClass("key");
+					}
+					
+					if (steps == 1 && !$("#table ul li").eq(actualC[0]).hasClass("key")) {
+						$("#table ul li").eq(lastElementNum).addClass("finish");
+						$("#table ul li").eq(lastElementNum).html("<img class='cross' src='pipe.png'>");
+					}
+					if (steps > 0) {
+						scored += (rows[position] * columns[position]);
+						steps--;
+					} else if (position == lastElementNum && steps == 0) {
+						for (asd = 0; asd < lastElementNum; asd++) {
+							if (!$("#table ul li").eq(asd).hasClass("value")) {
+								$("#table ul li").eq(asd).empty();
+							}
+						}
+						actualC.length = 0;
+						wallRow.length = 0;
+						wallColumn.length = 0;
+						$("#table ul li").removeClass("pos");
+						$("#table ul li").removeClass("walled");
+						$("#table ul li").removeClass("key");
+						$("#table ul li").eq(lastElementNum).html("<img class='cross' src='rcross.png'>");
+						position = rowLength + 1;
+						$("#table ul li").eq(position).addClass("pos");
+						$("#table ul li").eq(position).append("<img class='peanut' src='peanut.gif'>");
+						actlvl++;
+						scored += 100;
+						actual = thisLevel[actlvl];
+						actualC = thisCell[actlvl];
+						$("#pawn").html(actual[0]);
+						$("#knight").html(actual[1]);
+						$("#bishop").html(actual[2]);
+						$("#rook").html(actual[3]);
+						$("#queen").html(actual[4]);
+						$("#king").html(actual[5]);
+						$("#table ul li").eq(actualC[0]).append("<img src='key.png'/>");
+						$("#table ul li").eq(actualC[0]).addClass("key");
+						steps = (-1) + actual[0] + actual[1] + actual[2] + actual[3] + actual[4] + actual[5];
+						for (s = 1; s < actualC.length; s++) {
+							$("#table ul li").eq(actualC[s]).append("<img src='wall.jpg'/>");
+							$("#table ul li").eq(actualC[s]).addClass("walled");
+							wallRow[s - 1] = rows[actualC[s]];
+							wallColumn[s - 1] = columns[actualC[s]]
+						}
+					}
+					
+					$("#scor").html(scored);
+				}
+			});
+			
+		});
+	</script>
+</head>
+<body>
+
+	<div id="score">
+		<div class="sco">score: </div><div id="scor"></div><div class="clear"></div>
+	</div>
+	<div id="container">
+		<div id="steps">
+			<div class="pawn piece"><img src="pieces/pawn.png"/></div>
+			<div id="pawn" class="data"></div>
+			<div class="knight piece"><img src="pieces/knight.png"/></div>
+			<div id="knight" class="data"></div>
+			<div class="bishop piece"><img src="pieces/bishop.png"/></div>
+			<div id="bishop" class="data"></div>
+			<div class="rook piece"><img src="pieces/rook.png"/></div>
+			<div id="rook" class="data"></div>
+			<div class="queen piece"><img src="pieces/queen.png"/></div>
+			<div id="queen" class="data"></div>
+			<div class="king piece"><img src="pieces/king.png"/></div>
+			<div id="king" class="data"></div>
+		</div>
+		<div id="table">
+			<ul>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+			</ul>
+		</div>
+	</div>
+	<div id="end"></div>
+
+</body>
+</html>

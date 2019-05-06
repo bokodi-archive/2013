@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Gomoku</title>
+	<meta charset="iso-8859-2"/>
+	<link rel="stylesheet" href="style.css"/>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script>	
+		$(document).ready(function() {
+			$("#start_button").click(function() {
+				rowLength = parseInt($("#row").val());
+				columnLength = parseInt($("#column").val());
+				second = $("#second").val();
+				third = $("#third").val();
+				
+				$("#row_req").css("color", "black");
+				$("#column_req").css("color", "black");
+				if ( isNaN(rowLength) || rowLength < 5 || rowLength > 20 ) { $("#row_req").css("color", "red"); }
+				if ( isNaN(columnLength) || columnLength < 5 || columnLength > 15 ) { $("#column_req").css("color", "red"); }
+				if ( !isNaN(rowLength) && rowLength >= 5 && rowLength <= 20 && !isNaN(columnLength) && columnLength >= 5 && columnLength <= 15 ) {
+					$("body").html('<div id="table"><ul></ul></div>');
+					numberOfCells = rowLength * columnLength;
+					empty = [];
+					for (i=0; i<numberOfCells; i++) {
+						$("#table ul").append('<li><canvas width="40px" height="40px">Your browser does not support the HTML5 canvas tag</canvas></li>');
+						empty[i] = i;
+					}
+					$("#table").css({"margin-top": (($(document).height() - $("#table ul li").height() * columnLength) / 2) , "width": $("#table ul li").width() * rowLength, "height": $("#table ul li").height() * columnLength});
+
+					player_one = 1;
+					crosses = [];
+					circles = [];
+					triangles = [];
+					if ( second == 'c' ) { player_two = 2 } else { player_two = 1 }
+					if ( third == 'n' ) { player_three = 0 } else if ( third == 'c' ) { player_three = 2 } else { player_three = 1 }
+					if ( !player_three ) { numberOfPlayers = 2; } else { numberOfPlayers = 3; }
+					
+					round = 1;
+					actual = player_one;
+					drawing = false;
+					game_over = false;
+					
+					$("body").on("click", "#table ul li canvas", function() {
+						index = $(this).parent().index();
+						if ( game_over || drawing || actual != 1 || $.inArray(index, empty) == (-1) ) { return false }
+						empty.splice($.inArray(index, empty), 1);
+						if ( !empty.length ) { $("body").append('<div id="outer"><div id="result">game over! draw</div></div>'); }
+						if ( round == 1 ) {
+							crosses[crosses.length] = index;
+							ifEnd = true;
+							check(index, 1);
+							ctxCross = $(this)[0].getContext('2d');
+							x = 6; y = 6; a = 34; b = 6;
+							round++;
+							drawing = true;
+							actual = player_two;
+							return crossInterval = setInterval(drawCross, 10);
+						} else if ( round == 2 ) {
+							circles[circles.length] = index;
+							ifEnd = true;
+							check(index, 2);
+							ctxCircle = $(this)[0].getContext('2d');
+							z = 1.6; w = 1.5;
+							if ( numberOfPlayers == 2 ) { round--; actual = player_one; } else { round++; actual = player_three; }
+							drawing = true;
+							return circleInterval = setInterval(drawCircle, 10);
+						} else if ( round == 3 ) {
+							triangles[triangles.length] = index;
+							ifEnd = true;
+							check(index, 3);
+							ctxTriangle = $(this)[0].getContext('2d');
+							r = 20;
+							s = 8;
+							round = 1;
+							step = 1;
+							drawing = true;
+							actual = player_one;
+							return triangleInterval = setInterval(drawTriangle, 10);
+						}
+					});
+					
+					function check(ix, array) {
+						roundExplode = [];
+						if (array == 1) {checkArray = crosses} else if (array == 2) {checkArray = circles} else if (array == 3) {checkArray = triangles}
+							prevH = ix - 1; nextH = ix + 1;
+							rnd = 1; explode = 1;
+							while ($.inArray(prevH, checkArray) != (-1) && column(prevH) != rowLength) { explode++; rnd++; prevH = ix - rnd; }
+							rnd = 1;
+							while ($.inArray(nextH, checkArray) != (-1) && column(nextH) != 1) { explode++; rnd++; nextH = ix + rnd; }
+							roundExplode[roundExplode.length] = explode;
+						if ( ifEnd && explode >= 5 ) { $("body").append('<div id="outer"><div id="result">game over! player ' + array + ' win!</div></div>'); game_over = true; return explode; }
+							prevV = ix - rowLength; nextV = ix + rowLength;
+							rnd = 1; explode = 1;
+							while ($.inArray(prevV, checkArray) != (-1) && row(prevV) >= 1) { explode++; rnd++; prevV = ix - rnd * rowLength; }
+							rnd = 1;
+							while ($.inArray(nextV, checkArray) != (-1) && row(nextV) <= columnLength) { explode++; rnd++; nextV = ix + rnd * rowLength; }
+							roundExplode[roundExplode.length] = explode;
+						if ( ifEnd && explode >= 5 ) { $("body").append('<div id="outer"><div id="result">game over! player ' + array + ' win!</div></div>'); game_over = true; return explode; }
+							prevL = ix - rowLength - 1; nextL = ix + rowLength + 1;
+							rnd = 1; explode = 1;
+							while ($.inArray(prevL, checkArray) != (-1) && row(prevL) >= 1 && column(prevL) != rowLength) { explode++; rnd++; prevL = ix - rnd - rnd * rowLength; }
+							rnd = 1;
+							while ($.inArray(nextL, checkArray) != (-1) && row(nextL) <= columnLength && column(nextL) != 1) { explode++; rnd++; nextL = ix + rnd + rnd * rowLength; }
+							roundExplode[roundExplode.length] = explode;
+						if ( ifEnd && explode >= 5 ) { $("body").append('<div id="outer"><div id="result">game over! player ' + array + ' win!</div></div>'); game_over = true; return explode; }
+							prevR = ix - rowLength + 1; nextR = ix + rowLength - 1;
+							rnd = 1; explode = 1;
+							while ($.inArray(prevR, checkArray) != (-1) && row(prevR) >= 1 && column(prevR) != 1) { explode++; rnd++; prevR = ix + rnd - rnd * rowLength; }
+							rnd = 1;
+							while ($.inArray(nextR, checkArray) != (-1) && row(nextR) <= columnLength && column(nextR) != rowLength) { explode++; rnd++; nextR = ix - rnd + rnd * rowLength; }
+							roundExplode[roundExplode.length] = explode;
+						if ( ifEnd && explode >= 5 ) { $("body").append('<div id="outer"><div id="result">game over! player ' + array + ' win!</div></div>'); game_over = true; return explode; }
+						dirNum = $.inArray(Math.max.apply(null, roundExplode), roundExplode);
+						if (dirNum==0) {prev=prevH; next=nextH; mtp = 1;}
+						else if (dirNum==1) {prev=prevV; next=nextV; mtp = ix + rowLength;}
+						else if (dirNum==2) {prev=prevL; next=nextL; mtp = ix + rowLength + 1;}
+						else if (dirNum==3) {prev=prevR; next=nextR; mtp = ix + rowLength - 1;}
+						return Math.max.apply(null, roundExplode);
+					}
+					
+					function row(inx) {
+						thisRow = Math.floor(inx / rowLength) + 1;
+						return thisRow;
+					}
+					function column(inx) {
+						thisColumn = (inx - (row(inx) - 1) * rowLength) + 1;
+						return thisColumn;
+					}
+					
+					function thinking() {
+						if ( !empty.length || game_over ) {return false}
+						if ( round == 2 ) {
+							if ( numberOfPlayers == 3 ) { luke_one = 3; luke_two = 1; } else { luke_one = 1; luke_two = 0; }
+							here = where(2, luke_one, luke_two);							
+							circles[circles.length] = here;
+							ifEnd = true;
+							check(here, 2);
+							ctxCircle = $("#table ul li").eq(here).children()[0].getContext('2d');
+							empty.splice($.inArray(here, empty), 1);
+							if ( !empty.length ) { $("body").append('<div id="outer"><div id="result">game over! draw</div></div>'); }
+							z = 1.6; w = 1.5;
+							if ( numberOfPlayers == 2 ) { round--; } else { round++; }
+							drawing = true;
+							return circleInterval = setInterval(drawCircle, 10);
+						} else if ( round == 3 ) {
+							here = where(3, 1, 2);							
+							triangles[triangles.length] = here;
+							ifEnd = true;
+							check(here, 3);
+							ctxTriangle = $("#table ul li").eq(here).children()[0].getContext('2d');
+							empty.splice($.inArray(here, empty), 1);
+							if ( !empty.length ) { $("body").append('<div id="outer"><div id="result">game over! draw</div></div>'); }
+							r = 20; s = 8; step = 1;
+							round = 1;
+							drawing = true;
+							return triangleInterval = setInterval(drawTriangle, 10);
+						}
+					}
+					
+					function where(mine, enemy_one, enemy_two) {
+						myPlace = 0;
+						prior = 24; actual_prior = 24;
+						chooseArray = [];
+						if ( enemy_two == 0 ) { thrps = false; } else { thrps = true; }
+						ifEnd = false;
+						for (i=0; i<empty.length; i++) {
+							myExplode = check(empty[i], mine); myPrev = prev; myNext = next;							
+							en_oneExp = check(empty[i], enemy_one); en_onePrev = prev; en_oneNext = next;
+							en_twoExp = check(empty[i], enemy_two); en_twoPrev = prev; en_twoNext = next;
+							
+							if ( prior >= 1 && myExplode >= 5 ) {
+								prior = 1; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+								
+							if ( prior >= 2 && en_oneExp >= 5 ) {
+								prior = 2; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							if ( thrps && prior >= 3 && en_twoExp >= 5 ) {
+								prior = 3; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+								
+							if ( prior >= 4 && myExplode >= 4 && $.inArray(myPrev,empty) != (-1) && $.inArray(myNext,empty) != (-1) ) {
+								prior = 4; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+								
+							if ( prior >= 5 && myExplode >= 4 && ($.inArray(myPrev,empty) != (-1) || $.inArray(myNext,empty) != (-1)) ) {
+								prior = 5; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							
+							if ( prior >= 6 && en_oneExp >= 4 && $.inArray(en_onePrev,empty) != (-1) && $.inArray(en_oneNext,empty) != (-1)  ) {
+								prior = 6; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							if ( thrps && prior >= 7 && en_twoExp >= 4 && $.inArray(en_twoPrev,empty) != (-1) && $.inArray(en_twoNext,empty) != (-1) ) {
+								prior = 7; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+								
+							if ( prior >= 8 && myExplode >= 3 && $.inArray(myPrev,empty) != (-1) && $.inArray(myNext,empty) != (-1) ) {
+								prior = 8; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+								
+							if ( prior >= 9 && en_oneExp >= 4 && ( $.inArray(en_onePrev,empty) != (-1) || $.inArray(en_oneNext,empty) != (-1) ) ) {
+								prior = 9; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							if ( thrps && prior >= 10 && en_twoExp >= 4 && ( $.inArray(en_twoPrev,empty) != (-1) || $.inArray(en_twoNext,empty) != (-1) ) ) {
+								prior = 10; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							
+							if ( prior >= 11 && en_oneExp >= 3 && $.inArray(en_onePrev,empty) != (-1) && $.inArray((en_oneNext),empty) != (-1) ) {
+								prior = 11; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							if ( thrps && prior >= 12 && en_twoExp >= 3 && $.inArray(en_twoPrev,empty) != (-1) && $.inArray((en_twoNext),empty) != (-1) ) {
+								prior = 12; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							
+							if ( prior >= 13 && myExplode >= 3 && (($.inArray(myPrev,empty) != (-1) && $.inArray(myPrev-mtp,empty) != (-1)) || ($.inArray(myNext,empty) != (-1) && $.inArray(myNext+mtp,empty) != (-1))) ) {
+								prior = 13; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							
+							if ( prior >= 14 && myExplode >= 2 && $.inArray(myPrev,empty) != (-1) && $.inArray(myNext,empty) != (-1) && ($.inArray((myPrev-mtp),empty) != (-1) || $.inArray((myNext+mtp),empty) != (-1) )) {
+								prior = 14; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							
+							if ( prior >= 15 && myExplode >= 2 && (($.inArray(myPrev,empty) != (-1) && $.inArray(myPrev-mtp,empty) != (-1) && $.inArray((myPrev-(2*mtp)),empty) != (-1)) || ($.inArray(myNext,empty) != (-1) && $.inArray(myNext+mtp,empty) != (-1) && $.inArray((myNext+(2*mtp)),empty) != (-1))) ) {
+								prior = 15; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							
+							if ( prior >= 16 && en_oneExp >= 3 && (($.inArray(en_onePrev,empty) != (-1) && $.inArray(en_onePrev-mtp,empty) != (-1)) || ($.inArray(en_oneNext,empty) != (-1) && $.inArray(en_oneNext+mtp,empty) != (-1))) ) {
+								prior = 16; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							if ( thrps && prior >= 17 && en_twoExp >= 3 && (($.inArray(en_twoPrev,empty) != (-1) && $.inArray(en_twoPrev-mtp,empty) != (-1)) || ($.inArray(en_twoNext,empty) != (-1) && $.inArray(en_twoNext+mtp,empty) != (-1))) ) {
+								prior = 17; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							
+							if ( prior >= 18 && en_oneExp >= 2 && $.inArray(en_onePrev,empty) != (-1) && $.inArray(en_oneNext,empty) != (-1) && ($.inArray((en_onePrev-mtp),empty) != (-1) || $.inArray((en_oneNext+mtp),empty) != (-1) )) {
+								prior = 18; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							if ( thrps && prior >= 19 && en_twoExp >= 2 && $.inArray(en_twoPrev,empty) != (-1) && $.inArray(en_twoNext,empty) != (-1) && ($.inArray((en_twoPrev-mtp),empty) != (-1) || $.inArray((en_twoNext+mtp),empty) != (-1) )) {
+								prior = 19; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							
+							if ( prior >= 20 && en_oneExp >= 2 && (($.inArray(en_onePrev,empty) != (-1) && $.inArray(en_onePrev-mtp,empty) != (-1) && $.inArray((en_onePrev-(2*mtp)),empty) != (-1)) || ($.inArray(en_oneNext,empty) != (-1) && $.inArray(en_oneNext+mtp,empty) != (-1) && $.inArray((en_oneNext+(2*mtp)),empty) != (-1))) ) {
+								prior = 20; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							if ( thrps && prior >= 21 && en_twoExp >= 2 && (($.inArray(en_twoPrev,empty) != (-1) && $.inArray(en_twoPrev-mtp,empty) != (-1) && $.inArray((en_twoPrev-(2*mtp)),empty) != (-1)) || ($.inArray(en_twoNext,empty) != (-1) && $.inArray(en_twoNext+mtp,empty) != (-1) && $.inArray((en_twoNext+(2*mtp)),empty) != (-1))) ) {
+								prior = 21; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							
+							if ( prior >= 22 && en_oneExp >= 2 && ($.inArray(en_onePrev,empty) != (-1) || $.inArray(en_oneNext,empty) != (-1)) ) {
+								prior = 22; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+							if ( thrps && prior >= 23 && en_twoExp >= 2 && ($.inArray(en_twoPrev,empty) != (-1) || $.inArray(en_twoNext,empty) != (-1)) ) {
+								prior = 23; if ( prior != actual_prior ) { chooseArray = []; actual_prior = prior; }
+								chooseArray[chooseArray.length] = empty[i]; }
+						}
+						console.log('prior');
+						if (prior >= 24) { myPlace = empty[Math.floor(Math.random() * empty.length)]; }
+						else { myPlace = chooseArray[Math.floor(Math.random() * chooseArray.length)]; }
+						console.log('prior: ' + prior);
+						return myPlace;
+					}
+					
+					function drawCross() {
+						if ( x < 34 || y < 34 ) {
+							ctxCross.beginPath();
+							ctxCross.moveTo(x,y);
+							x += 2;
+							y += 2;
+							ctxCross.lineWidth = 4;
+							ctxCross.strokeStyle = '#ff0000';
+							ctxCross.lineTo(x,y);
+							ctxCross.stroke();
+						} else {
+							ctxCross.beginPath();
+							ctxCross.moveTo(a,b);
+							a -= 2;
+							b += 2;
+							ctxCross.lineWidth = 4;
+							ctxCross.strokeStyle = '#ff0000';
+							ctxCross.lineTo(a,b);
+							ctxCross.stroke();
+							if ( a <= 6 || b >= 34 ) {
+								clearInterval(crossInterval);
+								drawing = false;
+								if ( actual == 2 ) { if (numberOfPlayers == 2) {actual = player_one} else {actual = player_three} thinking(); }
+							}
+						}
+					}
+					function drawCircle() {
+						ctxCircle.beginPath();
+						ctxCircle.lineWidth = 4;
+						ctxCircle.strokeStyle = '#0000ff';
+						ctxCircle.arc(20,20,15,w*Math.PI,z*Math.PI);
+						ctxCircle.stroke();
+						if ( z > 2 ) { z = 0; }
+						if ( w > 2 ) { w = 0; }
+						z += 0.1; w += 0.1;
+						if ( w > 1.5 && w < 1.51 ) {
+							clearInterval(circleInterval);
+							drawing = false;
+							if ( actual == 2 ) { actual = player_one; thinking(); }
+						}
+					}
+					function drawTriangle() {
+						if ( step == 1 ) {
+							ctxTriangle.beginPath();
+							ctxTriangle.moveTo(r,s);
+							r -= 1;
+							s += 2;
+							ctxTriangle.lineWidth = 3;
+							ctxTriangle.strokeStyle = '#00aa00';
+							ctxTriangle.lineTo(r,s);
+							ctxTriangle.stroke();
+							if ( r <= 8 || s >= 32 ) { step = 2; r -= 1; }
+						} else if ( step == 2 ) {
+							ctxTriangle.beginPath();
+							ctxTriangle.moveTo(r,s);
+							r += 2;
+							ctxTriangle.lineWidth = 3;
+							ctxTriangle.strokeStyle = '#00aa00';
+							ctxTriangle.lineTo(r,s);
+							ctxTriangle.stroke();
+							if ( r >= 32 ) { step = 3; s += 1; }
+						} else {
+							ctxTriangle.beginPath();
+							ctxTriangle.moveTo(r,s);
+							r -= 1;
+							s -= 2;
+							ctxTriangle.lineWidth = 3;
+							ctxTriangle.strokeStyle = '#00aa00';
+							ctxTriangle.lineTo(r,s);
+							ctxTriangle.stroke();
+							if ( r <= 20 || s <= 7 ) { clearInterval(triangleInterval); drawing = false; }
+						}
+					}
+					
+					
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+
+	<div id="menu">
+		<div id="menu_title">Game menu</div>
+		<div id="menu_content">
+			<p class="size"><label class="label_size">row <span id="row_req">min. 5 max. 20</span></label><input min="5" max="20" id="row" class="input_size" type="number"/></p>
+			<p class="size"><label class="label_size">column <span id="column_req">min. 5 max. 15</span></label><input min="5" max="15" id="column" class="input_size" type="number"/></p>
+			<p class="players"><label>player1</label><label>player2</label><label>player3</label></p>
+			<p class="player_select">
+				<p class="select"><select><option value="h">Human</option></select></p>
+				<p class="select"><select id="second"><option value="c">CPU</option><option value="h">Human</option></select></p>
+				<p class="select"><select id="third"><option value="n">None</option><option value="h">Human</option><option value="c">CPU</option></select></p>
+			</p>
+			<div id="start_button">START</div>
+		</div>
+	</div>
+
+</body>
+</html>

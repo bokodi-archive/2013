@@ -1,0 +1,89 @@
+* {
+	margin: 0;
+	padding: 0;
+	text-decoration: none;
+	list-style-type: none;
+	border: none;
+	color: black;
+}
+body {
+	background: url('pics/bg.jpg');
+}
+.hide {
+	display: none;
+}
+div#next {
+	width: 144px;
+	height: 50px;
+	margin: 20px auto 0 auto;
+	border: 2px solid black;
+	background: #DBD688;
+}
+div#container {
+	width: 800px;
+	height: 500px;
+	margin: 10px auto 0 auto;
+}
+div#table {
+	float: left;
+	margin: 0 50px;
+	width: 500px;
+	height: 500px;
+}
+div#pretender {
+	width: 100px;
+	height: 500px;
+	float: left;
+}
+div#king {
+	width: 100px;
+	height: 500px;
+	float: left;
+}
+img.bottom {
+	position: relative;
+	top: 424px;
+}
+img.pulpit {
+	position: relative;
+	top: 350px;
+	left: 14px;
+}
+img#pfigure {
+	position: relative;
+	top: 268px;
+	left: 14px;
+}
+img#kfigure {
+	position: relative;
+	top: 259px;
+	left: 20px;
+}
+div#table ul {
+	width: 500px;
+	height: 500px;
+}
+div#table ul li {
+	float: left;
+	width: 50px;
+	height: 50px;
+	outline: black solid thin;
+	background: #DBD688;
+}
+div#end {
+	width: 800px;
+	height: 25px;
+	margin: 0 auto;
+}
+div#pscore {
+	width: 100px;
+	float: left;
+	text-align: center;
+	margin-top: -15px;
+}
+div#kscore {
+	width: 100px;
+	float: right;
+	text-align: center;
+	margin-top: -15px;
+}

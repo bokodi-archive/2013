@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Maze generator</title>
+	<meta http-equiv="content type" content="text/html; charset=iso-8859-2">
+	<link rel="stylesheet" href="style.css">
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script>
+		$(document).ready(function() {
+			rowLength = 20;
+			columnLength = 20;
+			horizontalWalls = rowLength * (columnLength + 1);
+			verticalWalls = columnLength * (rowLength + 1);
+			numberOfWalls = horizontalWalls + verticalWalls;
+			numberOfCells = rowLength * columnLength;
+			wallList = new Array(); wallArrayIndex = 0;
+			mazeList = new Array(); mazeArrayIndex = 0;
+			startCell = Math.floor(Math.random() * numberOfCells);
+			mazeList[mazeArrayIndex] = startCell; mazeArrayIndex++;
+			wallsOfCell(startCell);
+			
+			for (i=0; i < numberOfCells; i++) {
+				$("#table ul").append("<li></li>");
+			}
+			
+			$("#table ul li").eq(0).css("border-top", "1px solid transparent");
+			
+			while (wallList.length != 0) {
+				var random = Math.floor(Math.random() * wallList.length);
+				wallPick(wallList[random]);
+			}
+	
+			function row(ix) {
+				var thisRow = Math.floor(ix / rowLength) + 1;
+				return thisRow;
+			}
+			
+			function column(ix) {
+				var thisColumn = (ix - (row(ix) - 1) * rowLength) + 1;
+				return thisColumn;
+			}
+			
+			function wallsOfCell(cellIndex) {
+				if (row(cellIndex) != 1 && $.inArray((cellIndex + 1), wallList) == (-1)) { wallList[wallArrayIndex] = cellIndex + 1; wallArrayIndex++; }
+				if (column(cellIndex) != rowLength && $.inArray((cellIndex + row(cellIndex) + 1 + horizontalWalls), wallList) == (-1)) { wallList[wallArrayIndex] = cellIndex + row(cellIndex) + 1 + horizontalWalls; wallArrayIndex++; }
+				if (row(cellIndex) != columnLength && $.inArray((cellIndex + 1 + rowLength), wallList) == (-1)) { wallList[wallArrayIndex] = cellIndex + 1 + rowLength; wallArrayIndex++; }
+				if (column(cellIndex) != 1 && $.inArray((cellIndex + row(cellIndex) + horizontalWalls), wallList) == (-1)) { wallList[wallArrayIndex] = cellIndex + row(cellIndex) + horizontalWalls; wallArrayIndex++; }
+			}
+			
+			function wallPick(wallIndex) {
+				if (wallIndex <= horizontalWalls) {
+					var topCell = wallIndex - 1 - rowLength;
+					var bottomCell = wallIndex - 1;
+					if ( ($.inArray(topCell, mazeList) != (-1)) ^ $.inArray(bottomCell, mazeList) != (-1) ) {
+						$("#table ul li").eq(bottomCell).css("border-top", "1px solid #FFEDB0");
+						if ($.inArray(topCell, mazeList) == (-1)) { mazeList[mazeArrayIndex] = topCell; mazeArrayIndex++; wallsOfCell(topCell); }
+						if ($.inArray(bottomCell, mazeList) == (-1)) { mazeList[mazeArrayIndex] = bottomCell; mazeArrayIndex++; wallsOfCell(bottomCell); }
+					} else {
+						wallY = $.inArray(wallIndex, wallList);
+						wallList.splice(wallY, 1);
+						wallArrayIndex = wallArrayIndex - 1;
+					}
+				} else {
+					var leftCell = wallIndex - horizontalWalls - Math.ceil((wallIndex - horizontalWalls) / (rowLength + 1)) - 1;
+					var rightCell = wallIndex - horizontalWalls - Math.ceil((wallIndex - horizontalWalls) / (rowLength + 1));
+					if ( ($.inArray(leftCell, mazeList) != (-1)) ^ $.inArray(rightCell, mazeList) != (-1) ) {
+						$("#table ul li").eq(rightCell).css("border-left", "1px solid #FFEDB0");
+						if ($.inArray(leftCell, mazeList) == (-1)) { mazeList[mazeArrayIndex] = leftCell; mazeArrayIndex++; wallsOfCell(leftCell); }
+						if ($.inArray(rightCell, mazeList) == (-1)) { mazeList[mazeArrayIndex] = rightCell; mazeArrayIndex++; wallsOfCell(rightCell); }
+					} else {
+						wallY = $.inArray(wallIndex, wallList);
+						wallList.splice(wallY, 1);
+						wallArrayIndex = wallArrayIndex - 1;
+					}
+				}
+			}
+		});
+	</script>
+</head>
+<body>
+
+	<div id="table"><ul></ul></div>
+
+</body>
+</html>

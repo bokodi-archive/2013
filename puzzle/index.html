@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Puzzle</title>
+	<meta name="description" content=""/>
+	<meta http-equiv="content type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="style.css">
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="timer.js"></script>
+	<script>
+		$(document).ready(function() {
+			shuffle = function(o) {
+				for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+					return o;
+			};
+			
+			var randomnumber = shuffle([1,2,3,4,5,6,7,8,9]);
+			
+			// shuffle the images
+			for (var i=0; i<9 ;i++) {
+				$(".images").eq(i).attr("src", "e_1/" + randomnumber[i] + ".jpg");
+			}
+			
+			moves = 0;
+			game_level = 1;
+			game_mode = "e";
+			folder = game_mode + "_" + game_level + "/";
+			
+			$(".images").click(function() {
+				if ($("#target img").attr("src") == "0.jpg") {
+					selected = $(this).attr("src");
+					$("#target img").attr("src", selected);
+					$(this).addClass("selected");
+				} else {
+					moves = moves + 1;
+					changed = $(this).attr("src");
+					$(".selected").attr("src", changed);
+					$(this).attr("src", selected);
+					$("#target img").attr("src", "0.jpg");
+					$(".images").removeClass("selected");
+					$("#moves").html(moves);
+					
+					// verify the values
+					for (var m=0, n=1, p=0; m<9; m++, n++) {
+						if ($(".images").eq(m).attr("src") == folder + n + ".jpg") {
+							p++;
+						}
+					}
+					
+					// if completed
+					if (p == 9) {
+						game_level++;
+						folder = game_mode + "_" + game_level + "/";
+						moves = 0;
+						$("#game_level").html(game_level);
+						$("#moves").html(moves);
+						$('#counterSec').html(0);
+						$('#counterMin').html(0);
+						var randomnumber = shuffle([1,2,3,4,5,6,7,8,9]);
+						for (var q=0; q<9 ;q++) {
+							$(".images").eq(q).attr("src", folder + randomnumber[q] + ".jpg");
+						}
+						
+					}
+				}				
+			});
+		});
+	</script>
+</head>
+<body>
+
+	<div id="container">
+		<div id="image_board">
+			<img class="images" src=""/>
+			<img class="images" src=""/>
+			<img class="images" src=""/>
+			<img class="images" src=""/>
+			<img class="images" src=""/>
+			<img class="images" src=""/>
+			<img class="images" src=""/>
+			<img class="images" src=""/>
+			<img class="images" src=""/>
+		</div>
+		<div id="game_infos">
+			<div class="gameinfo"><div class="game_info_name">Game mode: </div><div id="game_mode">easy</div></div>
+			<div class="gameinfo"><div class="game_info_name">Game level: </div><div id="game_level">1</div></div>
+			<div class="gameinfo"><div class="game_info_name">Moves: </div><div id="moves">0</div></div>
+			<div class="gameinfo"><div class="game_info_name">Time: </div>
+				<div id="game_time">
+					<div class="norm" id="counterMin">0</div><div class="norm padd">m</div>
+					<div class="norm" id="counterSec">0</div><div class="norm padd">s</div>
+				</div>
+			</div>
+			<div class="clear"></div>
+			<p id="selected_title">SELECTED:</p>
+			<div id="target"><img src="0.jpg"/></div>
+		</div>
+	</div>
+	
+</body>
+</html>

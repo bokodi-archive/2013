@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Memory game</title>
+	<meta charset="iso-8859-2"/>
+	<link rel="stylesheet" href="style.css"/>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script>
+		$(document).ready(function() {
+			x = $(document).width();
+			y = $(document).height();
+			default_level = 1;
+			first_level_elements = 3;
+			first_level_max = 10;
+			offset = 100;
+			memory_time = 3000;
+			points = 40;
+			score = 0;
+			actual_level = default_level;
+			table = $("#table");
+			
+			start(actual_level);	
+			
+			$("body").on("click", "#next_level", function(){
+				actual_level++;
+				start(actual_level);
+			});
+			
+			$("body").on("click", "#try_again", function(){
+				actual_level = default_level;
+				score = 0;
+				start(actual_level);
+			});
+
+			function start(level) {
+				game_over = false;
+				succeed = false;
+				table.empty();
+				table.html("<ul></ul>");
+				list = $("#table ul");
+				level_numbers = [];
+				sorted_numbers = [];
+				level_places = [];
+				
+				level_max = first_level_max + Math.floor(level / 5) * 10;
+				
+				for (i=0; i<(first_level_elements + level - 1); i++) {
+					do {
+						random = Math.floor(Math.random() * level_max);
+					} while ($.inArray(random, level_numbers) != (-1))
+					
+					level_numbers[level_numbers.length] = random;
+					sorted_numbers[sorted_numbers.length] = random;
+					
+					list.append('<li>'+random+'</li>');
+
+					do {
+						placeX = Math.floor((0.1 * x) + (Math.random() * (x * 0.8)) - $("#table ul li").width() / 2);
+						placeY = Math.floor((0.1 * y) + (Math.random() * (y * 0.8)) - $("#table ul li").height() / 2);
+						again = false;
+						for (j=0; j<level_places.length; j++) {
+							if ( j % 2 == 1 ) { continue }
+							if ( Math.abs(level_places[j] - placeX) < offset && Math.abs(level_places[j+1] - placeY) < offset ) { again = true }
+						}
+					} while (again)
+					level_places[level_places.length] = placeX;
+					level_places[level_places.length] = placeY;
+					$("#table ul li").eq(i).css({"left": placeX, "top": placeY});
+				}
+				
+				setTimeout(function() {
+					$("#table ul li").empty();
+					sorted_numbers.sort(function(a,b){return a-b});
+					item = $("#table ul li");
+					item.click(function() {
+						if ( succeed == true || game_over == true ) { return false }
+						index = $(this).index();
+						$(this).html(level_numbers[index]);
+						min = sorted_numbers[0];
+						if ( level_numbers[index] == min ) {
+							$(this).css('background', '#00FF00');
+							sorted_numbers.splice(0, 1);
+							score += points;
+							if ( sorted_numbers.length == 0 ) {
+								succeed = true;
+								table.append('<div id="next_level">next level</div>');
+							}
+						} else {
+							item.css('background', 'red');
+							for (k=0; k<level_numbers.length; k++) {
+								item.eq(k).html(level_numbers[k]);
+							}
+							game_over = true;
+							score *= level;
+							table.append('<div id="score">score: '+score+'</div><div id="try_again">try again</div>');
+						}
+					});
+				}, memory_time);
+			}
+		});
+	</script>
+</head>
+<body>
+
+	<div id="table"></div>
+
+</body>
+</html>

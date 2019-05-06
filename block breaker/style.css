@@ -1,0 +1,67 @@
+* {
+	padding: 0;
+	margin: 0;
+	border: none;
+	text-decoration: none;
+	list-style-type: none;
+	font-weight: normal;
+	color: black;
+}
+div.clear {
+	clear: both;
+}
+body {
+	background: url('bg.jpg') repeat fixed #000;
+}
+div#game_data_menu {
+	width: 706px;
+	height: 60px;
+	margin: 20px auto;
+	background: #C2B26B;
+	border: 2px solid black;
+}
+div#game_data_menu ul {
+	float: left;
+	width: 690px;
+	margin: 0 5px;
+}
+li.game_datas {
+	float: left;
+	width: 100px;
+	margin: 15px 5px;
+	text-align: center;
+}
+div#container {
+	background: #C2B26B;
+	width: 700px;
+	height: 500px;
+	border: 5px solid black;
+	margin: 0 auto;
+}
+div#walls {
+	position: absolute;
+}
+div#walls ul {
+	position: absolute;
+	width: 700px;
+	float: left;
+}
+div#walls ul li.wall {
+	background: blue;
+	float: left;
+	width: 60px;
+	height: 20px;
+	margin: 5px;
+}
+div#ball img {
+	width: 10px;
+	height: 10px;
+	position: absolute;
+}
+div#foo {
+	background-color: black;
+	width: 100px;
+	height: 10px;
+	position: absolute;
+	border-radius: 2px;
+}

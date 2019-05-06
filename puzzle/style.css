@@ -1,0 +1,78 @@
+* {
+	padding: 0;
+	margin: 0;
+	text-decoration: none;
+	border-style:none;
+	color: black;
+}
+div.clear {
+	clear: both;
+}
+body {
+	background-color: #DEC07A;
+}
+div#container {
+	width: 900px;
+	height: 500px;
+	margin: 100px auto 0 auto;
+}
+div#image_board {
+	width: 300px;
+	height: 300px;
+	float: left;
+	margin: 100px;
+}
+img.images {
+	width: 100px;
+	height: 100px;
+	float: left;
+	cursor: pointer;
+}
+div#game_infos {
+	width: 300px;
+	height: 455px;
+	padding: 45px 50px 0 50px;
+	float: left;
+	background: #B37024;
+}
+div.gameinfo {
+	width: 292px;
+	float: left;
+	padding: 4px;
+}
+div.game_info_name{
+	width: 146px;
+	float: left;
+	font-size: 24px;
+	font-weight: bold;
+}
+div#game_mode, div#game_level, div#moves, div#game_time {
+	width: 146px;
+	float: left;
+	font-size: 24px;
+	color: white;
+}
+div.norm {
+	float: left;
+	font-size: 24px;
+	color: white;
+}
+div.padd {
+	padding: 0 20px 0 5px;
+}
+p#selected_title {
+	width: 300px;
+	text-align: center;
+	font-size: 30px;
+	margin: 70px auto 20px auto;
+}
+div#target {
+	width: 100px;
+	height: 100px;
+	margin: 0 auto;
+}
+div#target img {
+	width: 100px;
+	height: 100px;
+	float: left;
+}

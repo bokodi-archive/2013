@@ -1,0 +1,93 @@
+* {
+	margin: 0;
+	padding: 0;
+	text-decoration: none;
+	list-style-type: none;
+	font-weight: normal;
+	border: none;
+	color: black;
+}
+div.clear {
+	clear: both;
+}
+body {
+	background: url('bg.jpg') repeat fixed top left #000;
+}
+div#score {
+	width: 600px;
+	height: 40px;
+	border: 3px solid black;
+	margin: 0 auto 10px auto;
+	background: #FFEDB0;
+	font-size: 25px;
+}
+div.sco {
+	width: 80px;
+	float: left;
+}
+div#container {
+	width: 906px;
+	margin: 0 auto;
+}
+div#steps {
+	float: left;
+	width: 250px;
+	height: 450px;
+	margin: 50px auto 0 auto;
+	border: 3px solid black;
+	background: #FFEDB0;
+}
+div.piece {
+	width: 99px;
+	height: 75px;
+	float: left;
+	border-right: 1px solid black;
+}
+div.piece img {
+	margin: 5px 0 0 20px;
+}
+div.data {
+	width: 150px;
+	height: 75px;
+	float: left;
+	font-size: 40px;
+}
+div#table {
+	float: left;
+	width: 550px;
+	height: 550px;
+	margin-left: 50px;
+	border: 3px solid black;
+}
+div#table ul li {
+	background: #FFEDB0;
+	width: 48px;
+	height: 48px;
+	border: 1px solid black;
+	float: left;
+}
+div#table ul li.value {
+	width: 48px;
+	height: 48px;
+	line-height: 48px;
+	text-align: center;
+	font-weight: bold;
+	font-size: 25px;
+	background: #D1CC94;
+}
+div#table ul li img.peanut {
+	margin: 6px 0 0 7px;
+}
+img.cross {
+	position: absolute;
+	float: left;
+}
+p#scor {
+	font-size: 25px;
+	height: 30px;
+}
+
+
+
+
+

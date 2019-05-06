@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Block breaker</title>
+	<meta http-equiv="content type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="style.css">
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script>
+		$(document).ready(function() {
+			// config
+			speed = 15;
+			numberOFwalls = 50;
+			
+			// game stats
+			hits = 0;
+			
+			for (var w = 0; w < numberOFwalls; w++) {
+				$("#walls ul").append('<li class="wall"></li>');
+			}
+			
+			offLeft = $("#container").offset().left;
+			offTop = $("#container").offset().top;
+			borderLeft = (($("#container").outerWidth() - $("#container").innerWidth()) / 2);
+			borderTop = (($("#container").outerHeight() - $("#container").innerHeight()) / 2);
+			fooLeftPos = offLeft + $("#container").outerWidth() / 2 - $("#foo").width() / 2;
+			fooTopPos = offTop + $("#container").outerHeight() * 0.9;
+			$("#foo").css({"left": fooLeftPos, "top": fooTopPos});
+			
+			ballLeftPos = offLeft + $("#container").outerWidth() / 2 - $("#ball img").width() / 2;
+			ballTopPos = offTop + $("#container").outerHeight() * 0.9 - $("#ball img").height() * 2;
+			$("#ball img").css({"left": ballLeftPos, "top": ballTopPos});
+			
+			$("#container").mouseenter(function(e) {
+				fooLeftPos = e.pageX - ($("#foo").width() / 2);
+				$("#foo").css({"left": fooLeftPos});
+			}).mousemove(function(e) {
+				if (e.pageX < offLeft + borderLeft + $("#foo").width() / 2) {
+					$("#foo").css({"left": (offLeft + borderLeft)});
+				} else if (e.pageX > offLeft + borderLeft + $("#container").width() - $("#foo").width() / 2) {
+					$("#foo").css({"left": (offLeft + borderLeft + $("#container").width() - $("#foo").width())});
+				} else {
+					fooLeftPos = e.pageX - ($("#foo").width() / 2);
+					$("#foo").css({"left": fooLeftPos});
+				}
+			}).mouseleave(function() {
+				fooLeftPos = e.pageX - ($("#foo").width() / 2);
+				$("#foo").css({"left": fooLeftPos});
+			});
+			
+			g = 0;
+			gameSpeed = setInterval("beginGame()", speed);
+			setSpeed = speed;
+			ascend = -3;
+			descend = 3;
+			turnAngle = 4;
+			upORdown = ascend;
+			stepPerSecond = (1000 / speed) * (Math.abs(ascend) + Math.abs(turnAngle));
+			
+			wallTops = new Array();
+			wallLefts = new Array();
+			wallBottoms = new Array();
+			wallRights = new Array();
+			crashed = new Array();
+			
+			for (a = 0; a < numberOFwalls; a++) {
+				thisWall = $("#walls li:eq("+a+")");
+				wallTop = thisWall.position().top + ((thisWall.outerHeight(true) - thisWall.innerHeight()) / 2);
+				wallLeft = thisWall.position().left + ((thisWall.outerWidth(true) - thisWall.innerWidth()) / 2);
+				wallBottom = wallTop + thisWall.height() ;
+				wallRight = wallLeft + thisWall.width();
+				
+				wallTops[a] = wallTop;
+				wallLefts[a] = wallLeft;
+				wallBottoms[a] = wallBottom;
+				wallRights[a] = wallRight;
+			}
+			
+			$("#walls li").css("float", "none");
+			$("#walls li").css("position", "fixed");
+
+			for (c = 0; c < numberOFwalls; c++) {
+				$("#walls li:eq("+c+")").css({"left": (wallLefts[c] + offLeft), "top": (wallTops[c] + offTop)});
+			}
+
+		});
+		
+		function beginGame() {
+
+			ballNewLeftPos = $("#ball img").position().left;
+			ballNewTopPos = $("#ball img").position().top;
+			leftSide = offLeft + borderLeft;
+			rightSide = offLeft + $("#container").width() + borderLeft - turnAngle / 2;
+			topSide = offTop + borderTop;
+			bottomSide = ($("#foo").position().top + $("#foo").height());
+			fooTopSide = $("#foo").position().top - descend / 2;
+			middleOFball = ballNewLeftPos + $("#ball img").width() / 2;
+			middleOFfoo = $("#foo").position().left + $("#foo").width() / 2;
+			hitPoint = middleOFball - $("#foo").position().left;
+			
+			if (rightSide <= (ballNewLeftPos + $("#ball img").width())) {
+				turnAngle = turnAngle * (-1);
+			} else if (topSide >= ballNewTopPos) {
+				upORdown = descend;
+			} else if (leftSide >= ballNewLeftPos) {
+				turnAngle = turnAngle * (-1);
+			} else if (bottomSide < (ballNewTopPos + ($("#ball img").height() / 2))) {
+				$("#ball img").fadeOut("fast");
+				clearInterval(gameSpeed);
+			} else if (fooTopSide <= ballNewTopPos + $("#ball img").height()) {
+				if (($("#foo").position().left <= (ballNewLeftPos + $("#ball img").width())) && (($("#foo").position().left + $("#foo").width()) >= ballNewLeftPos)) {
+					upORdown = ascend;
+					if (middleOFball < middleOFfoo) {
+						turnAngle = 0 - ((($("#foo").width() / 2) - hitPoint) * 0.2);
+						multiplier = stepPerSecond / ((1000 / setSpeed) * (descend + (turnAngle * (-1))));
+						setSpeed = setSpeed / multiplier;
+						clearInterval(gameSpeed);
+						gameSpeed = setInterval("beginGame()", setSpeed);
+						
+						hits = hits + 1;
+						$("#hits").html("Hits: " + hits);
+						$("#speed").html("Step / s: " + (parseInt(1000 / setSpeed)));
+						$("#turnangle").html("Rotate: " + parseInt(turnAngle));
+						$("#hitpoint").html("Hitpoint: " + hitPoint);
+					} else {
+						turnAngle = 0 + ((hitPoint - $("#foo").width() / 2) * 0.2);
+						multiplier = stepPerSecond / ((1000 / setSpeed) * (descend + turnAngle));
+						setSpeed = setSpeed / multiplier;
+						clearInterval(gameSpeed);
+						gameSpeed = setInterval("beginGame()", setSpeed);
+						
+						hits = hits + 1;
+						$("#hits").html("Hits: " + hits);
+						$("#speed").html("Step/s: " + (parseInt(1000 / setSpeed)));
+						$("#turnangle").html("Turnangle: " + parseInt(turnAngle));
+						$("#hitpoint").html("Hitpoint: " + hitPoint);
+					}
+				}				
+			}
+			
+			for (i = 0; i < numberOFwalls; i++) {
+				if (jQuery.inArray(i, crashed) == -1) {
+					if ((wallBottoms[i] + offTop + borderTop + descend) >= ballNewTopPos) {
+						if (((ballNewLeftPos + $("#ball img").width()) >= (wallLefts[i] + offLeft + borderLeft)) && (ballNewLeftPos <= (wallRights[i] + offLeft + borderLeft))) {
+							$("#walls li").eq(i).hide();
+							crashed[g] = i;
+							g++;
+							upORdown = descend;
+						}
+					}
+				}
+			}
+			
+			ballNewLeftPos = $("#ball img").position().left + turnAngle;
+			ballNewTopPos = $("#ball img").position().top + upORdown;
+			$("#ball img").css({"left": ballNewLeftPos, "top": ballNewTopPos});
+
+		};
+	
+	</script>
+</head>
+<body>
+	
+	<div id="game_data_menu">
+		<ul>
+			<li class="game_datas" id="hits">Hits: 0</li>
+			<li class="game_datas" id="time">Time: /later/</li>
+			<li class="game_datas" id="speed">Step/s: 67</li>
+			<li class="game_datas" id="turnangle">Rotate: 1</li>
+			<li class="game_datas" id="hitpoint">Hitpoint: -</li>
+			<li class="game_datas" id="foowidth">Size: 100px</li>
+		</ul>
+	</div>
+	<div id="container">
+		<div id="walls"><ul></ul></div>
+		<div id="ball"><img src="ball.png"/></div>
+		<div id="foo"></div>
+	</div>
+	<div id="asd"></div>
+
+</body>
+</html>
